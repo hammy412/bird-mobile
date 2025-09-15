@@ -9,7 +9,9 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '../../lib/supabase';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -24,12 +26,22 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      // TODO: Implement actual login logic with Supabase
-      console.log('Login attempt:', { email, password });
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      Alert.alert('Success', 'Login successful!');
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
+
+      if (error) {
+        Alert.alert('Error', error.message);
+        return;
+      }
+
+      if (data.user) {
+        Alert.alert('Success', 'Login successful!');
+        router.replace('/(tabs)');
+      }
     } catch (error) {
+      console.error('Login error:', error);
       Alert.alert('Error', 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -47,6 +59,14 @@ export default function LoginScreen() {
         className="flex-1"
       >
         <View className="flex-1 justify-center px-8 py-12">
+          {/* Back Button */}
+          <TouchableOpacity
+            onPress={() => router.replace('/(tabs)')}
+            className="absolute top-12 left-6 z-10"
+          >
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+
           {/* Header */}
           <View className="mb-12">
             <Text className="text-4xl font-bold text-white text-center mb-2">

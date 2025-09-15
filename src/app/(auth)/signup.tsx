@@ -9,28 +9,45 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '../../lib/supabase';
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleSignUp = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // TODO: Implement actual login logic with Supabase
-      console.log('Login attempt:', { email, password });
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      Alert.alert('Success', 'Login successful!');
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password,
+      });
+
+      if (error) {
+        Alert.alert('Error', error.message);
+        return;
+      }
+
+      if (data.user) {
+        Alert.alert('Success', 'Account created successfully! Please check your email to verify your account.');
+        router.replace('/(tabs)');
+      }
     } catch (error) {
-      Alert.alert('Error', 'Login failed. Please try again.');
+      console.error('Signup error:', error);
+      Alert.alert('Error', 'Signup failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -47,13 +64,21 @@ export default function SignUpScreen() {
         className="flex-1"
       >
         <View className="flex-1 justify-center px-8 py-12">
+          {/* Back Button */}
+          <TouchableOpacity
+            onPress={() => router.replace('/(tabs)')}
+            className="absolute top-12 left-6 z-10"
+          >
+            <Ionicons name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+
           {/* Header */}
           <View className="mb-12">
             <Text className="text-4xl font-bold text-white text-center mb-2">
-              Welcome Back
+              Create Account
             </Text>
             <Text className="text-gray-400 text-center text-lg">
-              Create an account
+              Sign up to start learning bird calls
             </Text>
           </View>
 
@@ -102,9 +127,9 @@ export default function SignUpScreen() {
               </Text>
             </TouchableOpacity>
 
-            {/* Login Button */}
+            {/* Sign Up Button */}
             <TouchableOpacity
-              onPress={handleLogin}
+              onPress={handleSignUp}
               disabled={isLoading}
               className={`py-4 rounded-xl ${
                 isLoading 
@@ -113,7 +138,7 @@ export default function SignUpScreen() {
               }`}
             >
               <Text className="text-white text-center font-semibold text-lg">
-                {isLoading ? 'Signing In...' : 'Sign In'}
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </Text>
             </TouchableOpacity>
           </View>
