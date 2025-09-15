@@ -59,13 +59,7 @@ export default function LoginScreen() {
         className="flex-1"
       >
         <View className="flex-1 justify-center px-8 py-12">
-          {/* Back Button */}
-          <TouchableOpacity
-            onPress={() => router.replace('/(tabs)')}
-            className="absolute top-12 left-6 z-10"
-          >
-            <Ionicons name="arrow-back" size={24} color="white" />
-          </TouchableOpacity>
+
 
           {/* Header */}
           <View className="mb-12">
